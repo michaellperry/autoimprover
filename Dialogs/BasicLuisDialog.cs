@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Luis;
 using Microsoft.Bot.Builder.Luis.Models;
+using System.Linq;
 
 namespace Microsoft.Bot.Sample.LuisBot
 {
@@ -25,10 +26,19 @@ namespace Microsoft.Bot.Sample.LuisBot
 
         // Go to https://luis.ai and create a new intent, then train/publish your luis app.
         // Finally replace "MyIntent" with the name of your newly created intent in the following handler
-        [LuisIntent("MyIntent")]
+        [LuisIntent("Reminder")]
         public async Task MyIntent(IDialogContext context, LuisResult result)
         {
-            await context.PostAsync($"You have reached the MyIntent intent. You said: {result.Query}"); //
+            var eventName = result.Entities
+                .Where(e => e.Type == "Event")
+                .Select(e => e.Entity)
+                .FirstOrDefault();
+            var time = result.Entities
+                .Where(e => e.Type == "builtin.datetimeV2.datetime")
+                .SelectMany(e => e.Resolution.Values)
+                .Select(t => t.GetType().Name)
+                .FirstOrDefault();
+            await context.PostAsync($"OK. Remember that {eventName} is at {time}");
             context.Wait(MessageReceived);
         }
     }
