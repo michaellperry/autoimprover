@@ -36,7 +36,8 @@ namespace Microsoft.Bot.Sample.LuisBot
             var time = result.Entities
                 .Where(e => e.Type == "builtin.datetimeV2.datetime")
                 .SelectMany(e => e.Resolution.Values)
-                .Select(t => t.GetType().FullName)
+                .SelectMany(t => t.GetType().GenericTypeArguments)
+                .Select(t => t.Name)
                 .FirstOrDefault();
             await context.PostAsync($"OK. Remember that {eventName} is at {time}");
             context.Wait(MessageReceived);
