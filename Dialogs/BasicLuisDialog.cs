@@ -33,11 +33,13 @@ namespace Microsoft.Bot.Sample.LuisBot
                 .Where(e => e.Type == "Event")
                 .Select(e => e.Entity)
                 .FirstOrDefault();
-            var time = result.Entities
+            var times = result.Entities
                 .Where(e => e.Type == "builtin.datetimeV2.datetime")
                 .SelectMany(e => e.Resolution.Values)
-                .SelectMany(t => t.GetType().GenericTypeArguments)
-                .Select(t => t.Name)
+                .ToArray();
+            var time = times
+                .OfType<dynamic>()
+                .Select(t => (string)t.value)
                 .FirstOrDefault();
             await context.PostAsync($"OK. Remember that {eventName} is at {time}");
             context.Wait(MessageReceived);
