@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Threading.Tasks;
 
@@ -33,15 +34,23 @@ namespace Microsoft.Bot.Sample.LuisBot
                 .Where(e => e.Type == "Event")
                 .Select(e => e.Entity)
                 .FirstOrDefault();
-            var times = result.Entities
+            var time = result.Entities
+                .Where(e => e.Type == "builtin.datetimeV2.time")
+                .SelectMany(e => e.Resolution.Values)
+                .OfType<IList<object>>()
+                .SelectMany(l => l)
+                .OfType<IDictionary<string, object>>()
+                .Select(d => d["value"] as string)
+                .FirstOrDefault();
+            var datetime = result.Entities
                 .Where(e => e.Type == "builtin.datetimeV2.datetime")
                 .SelectMany(e => e.Resolution.Values)
-                .ToArray();
-            var time = times
-                .OfType<dynamic>()
-                .Select(t => (string)t.value)
+                .OfType<IList<object>>()
+                .SelectMany(l => l)
+                .OfType<IDictionary<string, object>>()
+                .Select(d => d["value"] as string)
                 .FirstOrDefault();
-            await context.PostAsync($"OK. Remember that {eventName} is at {time}");
+            await context.PostAsync($"OK. Remember that {eventName} is at {datetime ?? time}");
             context.Wait(MessageReceived);
         }
     }
