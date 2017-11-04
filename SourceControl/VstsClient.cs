@@ -1,5 +1,4 @@
-﻿using Microsoft.Bot.Sample.LuisBot.Logging;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -14,13 +13,6 @@ namespace Microsoft.Bot.Sample.LuisBot.SourceControl
 {
     public class VstsClient
     {
-        private ILogger _logger;
-
-        public VstsClient(ILogger logger)
-        {
-            _logger = logger;
-        }
-
         public async Task<List<Build>> ListBuilds()
         {
             string teamName = GetTeamName();
