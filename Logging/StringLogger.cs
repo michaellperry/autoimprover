@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace LuisBot.Logging
+namespace Microsoft.Bot.Sample.LuisBot.Logging
 {
     public class StringLogger : ILogger
     {

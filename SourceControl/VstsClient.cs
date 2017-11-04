@@ -1,4 +1,4 @@
-﻿using LuisBot.Logging;
+﻿using Microsoft.Bot.Sample.LuisBot.Logging;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace LuisBot.SourceControl
+namespace Microsoft.Bot.Sample.LuisBot.SourceControl
 {
     public class VstsClient
     {

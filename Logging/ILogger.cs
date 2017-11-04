@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LuisBot.Logging
+namespace Microsoft.Bot.Sample.LuisBot.Logging
 {
     public interface ILogger
     {

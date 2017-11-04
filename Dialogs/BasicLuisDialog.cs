@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Threading.Tasks;
 
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Luis;
 using Microsoft.Bot.Builder.Luis.Models;
-using System.Linq;
 
 namespace Microsoft.Bot.Sample.LuisBot
 {
@@ -30,26 +28,9 @@ namespace Microsoft.Bot.Sample.LuisBot
         [LuisIntent("Reminder")]
         public async Task MyIntent(IDialogContext context, LuisResult result)
         {
-            var eventName = result.Entities
-                .Where(e => e.Type == "Event")
-                .Select(e => e.Entity)
-                .FirstOrDefault();
-            var time = result.Entities
-                .Where(e => e.Type == "builtin.datetimeV2.time")
-                .SelectMany(e => e.Resolution.Values)
-                .OfType<IList<object>>()
-                .SelectMany(l => l)
-                .OfType<IDictionary<string, object>>()
-                .Select(d => d["value"] as string)
-                .FirstOrDefault();
-            var datetime = result.Entities
-                .Where(e => e.Type == "builtin.datetimeV2.datetime")
-                .SelectMany(e => e.Resolution.Values)
-                .OfType<IList<object>>()
-                .SelectMany(l => l)
-                .OfType<IDictionary<string, object>>()
-                .Select(d => d["value"] as string)
-                .FirstOrDefault();
+            string eventName = result.GetSimpleEntityValue("Event");
+            string time = result.GetComplexEntityValue("builtin.datetimeV2.time");
+            string datetime = result.GetComplexEntityValue("builtin.datetimeV2.datetime");
             await context.PostAsync($"OK. Remember that {eventName} is at {datetime ?? time}");
             context.Wait(MessageReceived);
         }
