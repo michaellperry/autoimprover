@@ -7,6 +7,7 @@ using Microsoft.Bot.Builder.Dialogs;
 using System.Web.Http.Description;
 using System.Net.Http;
 using System.Diagnostics;
+using System.Configuration;
 
 namespace Microsoft.Bot.Sample.LuisBot
 {
@@ -22,7 +23,8 @@ namespace Microsoft.Bot.Sample.LuisBot
         public virtual async Task<HttpResponseMessage> Post([FromBody] Activity activity)
         {
             // check if activity is of type message
-            if (activity.GetActivityType() == ActivityTypes.Message)
+            if (activity.GetActivityType() == ActivityTypes.Message &&
+                SpokenTo(activity.Text))
             {
                 await Conversation.SendAsync(activity, () => new BasicLuisDialog());
             }
@@ -60,6 +62,12 @@ namespace Microsoft.Bot.Sample.LuisBot
             }
 
             return null;
+        }
+
+        private bool SpokenTo(string text)
+        {
+            string botUserName = ConfigurationManager.AppSettings["BotUserName"];
+            return text.Contains($"@{botUserName}");
         }
     }
 }
