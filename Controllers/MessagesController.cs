@@ -14,6 +14,13 @@ namespace Microsoft.Bot.Sample.LuisBot
     [BotAuthentication]
     public class MessagesController : ApiController
     {
+        private readonly string _botUserName;
+
+        public MessagesController()
+        {
+            _botUserName = ConfigurationManager.AppSettings["BotUserName"];
+        }
+
         /// <summary>
         /// POST: api/Messages
         /// receive a message from a user and send replies
@@ -26,6 +33,7 @@ namespace Microsoft.Bot.Sample.LuisBot
             if (activity.GetActivityType() == ActivityTypes.Message &&
                 SpokenTo(activity.Text))
             {
+                activity.Text = RemoveAddress(activity.Text);
                 await Conversation.SendAsync(activity, () => new BasicLuisDialog());
             }
             else
@@ -66,8 +74,12 @@ namespace Microsoft.Bot.Sample.LuisBot
 
         private bool SpokenTo(string text)
         {
-            string botUserName = ConfigurationManager.AppSettings["BotUserName"];
-            return text.Contains($"@{botUserName}");
+            return text.Contains($"@{_botUserName}");
+        }
+
+        private string RemoveAddress(string text)
+        {
+            return text.Replace($"@{_botUserName}", "");
         }
     }
 }
