@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace Microsoft.Bot.Sample.LuisBot.SourceControl
+namespace Microsoft.Bot.Sample.LuisBot.Tasks.SourceControl
 {
     public class VstsClient
     {

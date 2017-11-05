@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Microsoft.Bot.Sample.LuisBot.SourceControl
+namespace Microsoft.Bot.Sample.LuisBot.Tasks.SourceControl
 {
     public class Build
     {

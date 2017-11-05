@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Luis;
 using Microsoft.Bot.Builder.Luis.Models;
-using Microsoft.Bot.Sample.LuisBot.SourceControl;
+using Microsoft.Bot.Sample.LuisBot.Tasks.Reminders;
+using Microsoft.Bot.Sample.LuisBot.Tasks.SourceControl;
 using System.Linq;
-using Microsoft.Bot.Sample.LuisBot.Reminders;
 using Microsoft.Bot.Builder.ConnectorEx;
 
 namespace Microsoft.Bot.Sample.LuisBot
@@ -50,25 +50,9 @@ namespace Microsoft.Bot.Sample.LuisBot
         [LuisIntent("ListBuilds")]
         public async Task ListBuilds(IDialogContext context, LuisResult result)
         {
-            try
-            {
-                var vstsClient = new VstsClient();
-                var delay = Task.Delay(1000);
-                var fetch = vstsClient.ListBuilds();
-                var completed = await Task.WhenAny(fetch, delay);
-                if (completed == delay)
-                    await context.PostAsync("Let me get those builds for you...");
-
-                var builds = await fetch;
-                string buildsFormatted = builds
-                    .Select(b => $"{b.BuildNumber,-12}{b.Result,-11}{b.For,-20}{b.FinishTime:g}")
-                    .Aggregate("", (prior, current) => $"{prior}\n{current}");
-                await context.PostAsync($"I found {builds.Count} builds:\n```{buildsFormatted}```");
-            }
-            catch (Exception ex)
-            {
-                await context.PostAsync($"I'm having trouble listing the builds: {ex.Message}");
-            }
+            await context.PostAsync("OK. Let me get those builds for you...");
+            new ListBuilds(context.Activity.ToConversationReference()).Start();
+            context.Wait(MessageReceived);
         }
 
         private DateTime? InterpretDateTime(string datetime)
