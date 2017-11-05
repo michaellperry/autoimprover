@@ -8,6 +8,7 @@ using Microsoft.Bot.Builder.Luis.Models;
 using Microsoft.Bot.Sample.LuisBot.SourceControl;
 using System.Linq;
 using Microsoft.Bot.Sample.LuisBot.Reminders;
+using Microsoft.Bot.Builder.ConnectorEx;
 
 namespace Microsoft.Bot.Sample.LuisBot
 {
@@ -41,7 +42,7 @@ namespace Microsoft.Bot.Sample.LuisBot
             {
                 var delay = moment.Value.Subtract(DateTime.Now);
                 await context.PostAsync($"OK. I'll remind you of {eventName} in about {Math.Round(delay.TotalMinutes)} minutes.");
-                new Reminder(delay, eventName, context).Start();
+                new Reminder(delay, eventName, context.Activity.ToConversationReference()).Start();
             }
             context.Wait(MessageReceived);
         }
