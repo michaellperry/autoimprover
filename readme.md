@@ -99,7 +99,7 @@ public async Task Reminder(IDialogContext context, LuisResult result)
 }
 ```
 
-We're creating a conversation reference and passing it to a new `Reminder` object. Then we start that object so that the initial request can complete. You can find the source code for `Reminder` in [Reminders](https://github.com/michaellperry/autoimprover/tree/master/Reminders).
+We're creating a conversation reference and passing it to a new `Reminder` object. Then we start that object so that the initial request can complete. You can find the source code for `Reminder` in [Reminders](https://github.com/michaellperry/autoimprover/tree/master/Tasks/Reminders).
 
 ## Speak only when spoken to
 
@@ -164,26 +164,10 @@ For this lab, we are using VSTS as our CI tool. Using the VSTS API, we can list 
 [LuisIntent("ListBuilds")]
 public async Task ListBuilds(IDialogContext context, LuisResult result)
 {
-    try
-    {
-        var vstsClient = new VstsClient();
-        var delay = Task.Delay(1000);
-        var fetch = vstsClient.ListBuilds();
-        var completed = await Task.WhenAny(fetch, delay);
-        if (completed == delay)
-            await context.PostAsync("Let me get those builds for you...");
-
-        var builds = await fetch;
-        string buildsFormatted = builds
-            .Select(b => $"{b.BuildNumber,-12}{b.Result,-11}{b.For,-20}{b.FinishTime:g}")
-            .Aggregate("", (prior, current) => $"{prior}\n{current}");
-        await context.PostAsync($"I found {builds.Count} builds:\n```{buildsFormatted}```");
-    }
-    catch (Exception ex)
-    {
-        await context.PostAsync($"I'm having trouble listing the builds: {ex.Message}");
-    }
+    await context.PostAsync("OK. Let me get those builds for you...");
+    new ListBuilds(context.Activity.ToConversationReference()).Start();
+    context.Wait(MessageReceived);
 }
 ```
 
-You can find the `VstsClient` class in [SourceControl](https://github.com/michaellperry/autoimprover/tree/master/SourceControl).
+You can find the `ListBuilds` background task in [SourceControl](https://github.com/michaellperry/autoimprover/tree/master/Tasks/SourceControl).
