@@ -47,6 +47,60 @@ public async Task Reminder(IDialogContext context, LuisResult result)
 }
 ```
 
+## Wait for the event to remind me
+
+This bot is being coy. What I really want is for the bot to wait until the event and then remind me. So to do that, we'll suspend the conversation and pick it up again later.
+
+First we'll interpret the text that LUIS gave us indicating a datetime. Unfortunately, this text was ambiguous about the time zone. That's because LUIS doesn't know the user's time zone, and it operates in UTC. If we ask for a specific time, it will give us that time with no time zone. If we ask for a relative time, such as "in five minutes", then it will give us a UTC time, again with no time zone indicated.
+
+We'll just parse the datetime and hope for the best. Here are two methods for interpreting a datetime string, and for interpreting a time string. Add them to the `BasicLuisDialog`.
+
+```c#
+private DateTime? InterpretDateTime(string datetime)
+{
+    DateTime moment;
+    if (DateTime.TryParse(datetime, out moment))
+        return moment;
+    else
+        return null;
+}
+
+private DateTime? InterpretTime(string time)
+{
+    TimeSpan timeOfDay;
+    if (TimeSpan.TryParse(time, out timeOfDay))
+        return DateTime.Today.Add(timeOfDay);
+    else
+        return null;
+}
+```
+
+Now we can modify the `Reminder` method to interpret the strings.
+
+```c#
+[LuisIntent("Reminder")]
+public async Task Reminder(IDialogContext context, LuisResult result)
+{
+    string eventName = result.GetSimpleEntityValue("Event");
+    string time = result.GetComplexEntityValue("builtin.datetimeV2.time");
+    string datetime = result.GetComplexEntityValue("builtin.datetimeV2.datetime");
+    DateTime? moment = InterpretDateTime(datetime) ?? InterpretTime(time);
+    if (eventName == null || moment == null)
+    {
+        await context.PostAsync($"I think you want me to remind you of something, but I can't tell what.");
+    }
+    else
+    {
+        var delay = moment.Value.Subtract(DateTime.Now);
+        await context.PostAsync($"OK. I'll remind you of {eventName} in about {Math.Round(delay.TotalMinutes)} minutes.");
+        new Reminder(delay, eventName, context.Activity.ToConversationReference()).Start();
+    }
+    context.Wait(MessageReceived);
+}
+```
+
+We're creating a conversation reference and passing it to a new `Reminder` object. Then we start that object so that the initial request can complete. You can find the source code for `Reminder` in [Reminders](https://github.com/michaellperry/autoimprover/tree/master/Reminders).
+
 ## Speak only when spoken to
 
 It's rude and more than a bit annoying for a bot to try to respond to every conversation happening in Slack. You could set up a channel just for conversing with the bot, but then your team would have to go to that special place to see what's going on. Instead, let your bot hang out in #General, but only respond when directly addressed.
